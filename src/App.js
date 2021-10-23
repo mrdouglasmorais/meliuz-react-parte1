@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Hello from './Hello';
 import Content from './Content';
 
-import api from './service/api';
+import { jokeURL } from './service/api';
 
 export default function App(){
   const [ name, setName ] = useState('')
@@ -10,19 +10,31 @@ export default function App(){
   const [ isLoad, setIsLoad ] = useState(false)
   const [ newJoke, setNewJoke ] = useState(false)
 
-  const handleSetName = (nameFunction) => {
+  const handleSetName = useCallback( (nameFunction) => {
     setName(nameFunction)
-  }
+    console.log(joke?.value)
+  }, [joke])
 
   useEffect( () => {
     setIsLoad(true)
-    api.get('random').then(
+    jokeURL.get('random').then(
       response => {
         setJoke(response.data)
         setIsLoad(false)
       }
     )
   }, [newJoke])
+
+  if(isLoad){
+    return(
+      <>
+        <div>
+          <p>Carregando...</p>
+        </div>
+
+      </>
+    )
+  };
 
   return (
     <>
@@ -31,20 +43,10 @@ export default function App(){
       <Content/>
       <hr/>
       <button onClick={ () => setNewJoke(!newJoke)}> Mudar </button>
-      { isLoad && (
-        <div>
-          <p>Carregando...</p>
-        </div>
-      )}
-
-      { 
-      <>
-          <img src={joke?.icon_url} alt={joke?.value} />
-          <h1 style={{ textAlign: 'center' }}>
-            {joke?.value}
-          </h1>
-        </>
-      }
+      <img src={joke?.icon_url} alt={joke?.value} />
+      <h1 style={{ textAlign: 'center' }}>
+        {joke?.value}
+      </h1>
     </>
   )
 }
